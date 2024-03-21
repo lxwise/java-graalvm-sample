@@ -1,0 +1,121 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.star.graalvm</groupId>
+        <artifactId>java-graalvm-sample</artifactId>
+        <version>1.0</version>
+    </parent>
+
+    <artifactId>graalvm-javafx</artifactId>
+    <packaging>jar</packaging>
+
+    <name>graalvm-javafx</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <javafx.version>17.0.2</javafx.version>
+        <javafx.staticSdk.version>21-ea+5</javafx.staticSdk.version>
+        <gluonfx-maven-plugin.version>1.0.18</gluonfx-maven-plugin.version>
+        <start-class>com.star.graalvm.AppStart</start-class>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-fxml</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-media</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <release>${java.version}</release>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.openjfx</groupId>
+                <artifactId>javafx-maven-plugin</artifactId>
+                <version>0.0.8</version>
+                <configuration>
+                    <mainClass>${start-class}</mainClass>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.gluonhq</groupId>
+                <artifactId>gluonfx-maven-plugin</artifactId>
+                <version>${gluonfx-maven-plugin.version}</version>
+                <configuration>
+                    <!--运行主类-->
+                    <mainClass>${start-class}</mainClass>
+                    <!--Java11 静态库的版本Default: 11-ea+10-->
+                    <!--
+                    <javaStaticSdkVersion>11-ea+10</javaStaticSdkVersion>
+                    -->
+                    <!--JavaFX SDK 及其静态库的版本。这些将位于：~/.gluon/substrate/javafxStaticSdk/$javaStaticSdkVersion/$target-$arch/sdk/lib .-->
+                    <!--Java17 静态库的版本21-ea+5 -->
+                    <javafxStaticSdkVersion>${javafx.staticSdk.version}</javafxStaticSdkVersion>
+                    <!-- 允许的资源文件后缀 -->
+                    <resourcesList>
+                        <list>.*\\.properties$</list>
+                        <list>.*\\.yml$</list>
+                        <list>.*\\.dll</list>
+                    </resourcesList>
+                    <!-- 涉及反射的类 -->
+                    <reflectionList>
+                        <list>com.star.graalvm.App</list>
+                        <list>com.star.graalvm.control.HomeControl</list>
+                    </reflectionList>
+                    <nativeImageArgs>
+                        <!-- “快速构建”模式，以减少在开发过程中生成本机可执行文件所需的时间。请注意，此模式可能会对峰值性能和生成的可执行文件的大小产生负面影响，因此建议仅用于开发目的。 -->
+                        <arg>--add-exports=org.graalvm.nativeimage.builder/com.oracle.svm.core.jdk=ALL-UNNAMED</arg>
+                    </nativeImageArgs>
+                    <releaseConfiguration>
+                        <!-- all targets -->
+                        <!--<packageType></packageType>-->
+                        <description>JavaTools</description>
+                        <vendor>Ashin</vendor>
+                        <version>${version}</version>
+                    </releaseConfiguration>
+                    <runtimeArgs>
+                        <arg>-Dfile.encoding=UTF-8</arg>
+                    </runtimeArgs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

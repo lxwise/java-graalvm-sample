@@ -1,0 +1,203 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.star.graalvm</groupId>
+        <artifactId>java-graalvm-sample</artifactId>
+        <version>1.0</version>
+    </parent>
+
+    <artifactId>graalvm-normal</artifactId>
+    <packaging>jar</packaging>
+
+    <name>graalvm-normal</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <graalvm.version>23.1.0</graalvm.version>
+        <!--
+        大于 0.9.9 的版本会出现构建失败，https://github.com/graalvm/native-build-tools/issues/233
+        需要增加 <useArgFile>false</useArgFile>
+        -->
+        <native.maven.plugin.version>0.9.27</native.maven.plugin.version>
+        <start-class>com.star.graalvm.AppStart</start-class>
+<!--        <javafx.staticSdk.version>21-ea+5</javafx.staticSdk.version>-->
+<!--        <gluonfx-maven-plugin.version>1.0.18</gluonfx-maven-plugin.version>-->
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.graalvm.sdk</groupId>
+            <artifactId>graal-sdk</artifactId>
+            <version>${graalvm.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+<!--    <build>-->
+<!--        <plugins>-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                <version>3.8.1</version>-->
+<!--                <configuration>-->
+<!--                    <release>${java.version}</release>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+<!--            <plugin>-->
+<!--                <groupId>org.openjfx</groupId>-->
+<!--                <artifactId>javafx-maven-plugin</artifactId>-->
+<!--                <version>0.0.8</version>-->
+<!--                <configuration>-->
+<!--                    <mainClass>${start-class}</mainClass>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+<!--            <plugin>-->
+<!--                <groupId>com.gluonhq</groupId>-->
+<!--                <artifactId>gluonfx-maven-plugin</artifactId>-->
+<!--                <version>${gluonfx-maven-plugin.version}</version>-->
+<!--                <configuration>-->
+<!--                    &lt;!&ndash;运行主类&ndash;&gt;-->
+<!--                    <mainClass>${start-class}</mainClass>-->
+<!--                    &lt;!&ndash;Java11 静态库的版本Default: 11-ea+10&ndash;&gt;-->
+<!--                    &lt;!&ndash;-->
+<!--                    <javaStaticSdkVersion>11-ea+10</javaStaticSdkVersion>-->
+<!--                    &ndash;&gt;-->
+<!--                    &lt;!&ndash;JavaFX SDK 及其静态库的版本。这些将位于：~/.gluon/substrate/javafxStaticSdk/$javaStaticSdkVersion/$target-$arch/sdk/lib .&ndash;&gt;-->
+<!--                    &lt;!&ndash;Java17 静态库的版本21-ea+5 &ndash;&gt;-->
+<!--                    <javafxStaticSdkVersion>${javafx.staticSdk.version}</javafxStaticSdkVersion>-->
+<!--                    &lt;!&ndash; 允许的资源文件后缀 &ndash;&gt;-->
+<!--                    <resourcesList>-->
+<!--                        <list>.*\\.properties$</list>-->
+<!--                        <list>.*\\.yml$</list>-->
+<!--                        <list>.*\\.dll</list>-->
+<!--                    </resourcesList>-->
+<!--                    &lt;!&ndash; 涉及反射的类 &ndash;&gt;-->
+<!--                    <reflectionList>-->
+<!--                        <list>com.star.graalvm.AppStart</list>-->
+<!--&lt;!&ndash;                        <list>com.star.graalvm.control.HomeControl</list>&ndash;&gt;-->
+<!--                    </reflectionList>-->
+<!--                    <nativeImageArgs>-->
+<!--                        &lt;!&ndash; “快速构建”模式，以减少在开发过程中生成本机可执行文件所需的时间。请注意，此模式可能会对峰值性能和生成的可执行文件的大小产生负面影响，因此建议仅用于开发目的。 &ndash;&gt;-->
+<!--                        <arg>&#45;&#45;add-exports=org.graalvm.nativeimage.builder/com.oracle.svm.core.jdk=ALL-UNNAMED</arg>-->
+<!--                    </nativeImageArgs>-->
+<!--                    <releaseConfiguration>-->
+<!--                        &lt;!&ndash; all targets &ndash;&gt;-->
+<!--                        &lt;!&ndash;<packageType></packageType>&ndash;&gt;-->
+<!--                        <description>JavaTools</description>-->
+<!--                        <vendor>Ashin</vendor>-->
+<!--                        <version>${version}</version>-->
+<!--                    </releaseConfiguration>-->
+<!--                    <runtimeArgs>-->
+<!--                        <arg>-Dfile.encoding=UTF-8</arg>-->
+<!--                    </runtimeArgs>-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>build</goal>-->
+<!--                        </goals>-->
+<!--                        <phase>package</phase>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+<!--        </plugins>-->
+<!--    </build>-->
+    <build>
+        <plugins>
+            <!--
+              * 1. 编译器插件
+              * 2. 打包插件
+              * 3. 插件使用链接
+              https://maven.apache.org/plugins/maven-compiler-plugin/compile-mojo.html#forceJavacCompilerUse
+               -->
+             <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-compiler-plugin</artifactId>
+                 <version>3.8.1</version>
+             </plugin>
+            <!-- 插件使用链接 https://maven.apache.org/plugins/maven-assembly-plugin/assembly.html -->
+             <plugin>
+                 <groupId>org.apache.maven.plugins</groupId>
+                 <artifactId>maven-assembly-plugin</artifactId>
+                 <configuration>
+                     <finalName>${project.build.finalName}</finalName>
+                     <archive>
+                         <manifest>
+                             <mainClass>${start-class}</mainClass>
+                         </manifest>
+                     </archive>
+                     <!-- 表示使用assembly预制的描述符jar-with-dependencies创建包含项目依赖的程序集二进制文件。 -->
+                     <descriptorRefs>
+                         <descriptorRef>jar-with-dependencies</descriptorRef>
+                     </descriptorRefs>
+                     <appendAssemblyId>false</appendAssemblyId>
+                 </configuration>
+                 <!--配置将创建程序集绑定到了package阶段。则在执行mvn package后，会在target目录下生成类似的文件：
+                    XXX-1.0-SNAPSHOT-jar-with-dependencies.jar，在版本和后缀之间的jar-with-dependencies为用于创建程序集的描述符的id，
+                    即自定义的assembly描述符文件中配置的id。如果不想在文件或目录后追加此id，可以在配置中将appendAssemblyId设置为false-->
+                 <executions>
+                     <execution>
+                         <id>make-assembly</id>
+                         <phase>package</phase>
+                         <goals>
+                             <goal>single</goal>
+                         </goals>
+                     </execution>
+                 </executions>
+             </plugin>
+            <!-- 插件使用链接 https://graalvm.github.io/native-build-tools/latest/maven-plugin.html -->
+             <plugin>
+                 <groupId>org.graalvm.buildtools</groupId>
+                 <artifactId>native-maven-plugin</artifactId>
+                 <version>${native.maven.plugin.version}</version>
+                 <configuration>
+                     <skip>false</skip>
+                     <!-- 使用参数文件进行原生映像构建 -->
+                     <useArgFile>false</useArgFile>
+                     <!-- 指定镜像名称 如果未提供自定义映像名称，则默认使用项目的工件 ID。-->
+                     <imageName>${project.artifactId}</imageName>
+                     <!-- 指定主类 -->
+                     <mainClass>${start-class}</mainClass>
+                     <!-- 其他参数传递给本机映像生成器 -->
+                     <buildArgs>
+                         --no-fallback
+                         -H:-CheckToolchain
+                     </buildArgs>
+                     <!-- GraalVM 可达性元数据支持 -->
+                    <!-- https://github.com/oracle/graalvm-reachability-metadata -->
+                    <metadataRepository>
+                        <enabled>true</enabled>
+                    </metadataRepository>
+                    <!--
+                    <agent>
+                        <enabled>true</enabled>
+                    </agent>
+                    -->
+                     <!--使用快速构建模式构建映像 -->
+<!--                     <quickBuild>true</quickBuild>-->
+                </configuration>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <!-- “native：build”目标已弃用。请改用 'native：compile-no-fork'。 -->
+                            <goal>compile-no-fork</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

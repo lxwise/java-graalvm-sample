@@ -1,0 +1,145 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.7.7</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <groupId>com.shin.graalvm</groupId>
+    <artifactId>graalvm-web-springboot2</artifactId>
+    <version>1.0</version>
+    <packaging>jar</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <graalvm.version>23.1.0</graalvm.version>
+        <!--
+        大于 0.9.9 的版本会出现构建失败，https://github.com/graalvm/native-build-tools/issues/233
+        需要增加 <useArgFile>false</useArgFile>
+        -->
+        <native.maven.plugin.version>0.9.27</native.maven.plugin.version>
+        <spring.native.plugin.version>0.12.2</spring.native.plugin.version>
+        <start-class>com.shin.graalvm.Springboot2Application</start-class>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-thymeleaf</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-indexer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.experimental</groupId>
+            <artifactId>spring-native</artifactId>
+            <version>${spring.native.plugin.version}</version>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.graalvm.buildtools</groupId>
+                <artifactId>native-maven-plugin</artifactId>
+                <version>${native.maven.plugin.version}</version>
+                <configuration>
+                    <skip>false</skip>
+                    <!-- 使用参数文件进行原生映像构建 -->
+                    <useArgFile>false</useArgFile>
+                    <!-- 指定镜像名称 如果未提供自定义映像名称，则默认使用项目的工件 ID。-->
+                    <imageName>${project.artifactId}</imageName>
+                    <!-- 指定主类 -->
+                    <mainClass>${start-class}</mainClass>
+                    <!-- 其他参数传递给本机映像生成器 -->
+                    <buildArgs>
+                        --no-fallback
+                        <!-- org.apache.poi: Caused by: java.nio.charset.UnsupportedCharsetException: CP1252 -->
+                        <!--<arg>-H:+AddAllCharsets</arg>-->
+                        -H:-CheckToolchain
+                    </buildArgs>
+                    <!-- GraalVM 可达性元数据支持 -->
+                    <!-- https://github.com/oracle/graalvm-reachability-metadata -->
+                    <metadataRepository>
+                        <enabled>true</enabled>
+                    </metadataRepository>
+                </configuration>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.experimental</groupId>
+                <artifactId>spring-aot-maven-plugin</artifactId>
+                <version>${spring.native.plugin.version}</version>
+                <configuration>
+                    <!--
+                    切换插件实际提供给本机图像编译器的配置
+                    - native （默认）生成 AOT Spring 工厂、应用程序上下文引导程序、本机配置、本机图像.properties 以及替换。
+                    - native-agent 旨在与跟踪代理生成的配置一起使用。生成 AOT Spring 工厂、应用程序上下文引导程序、native-image.properties 以及替换。
+                    -->
+                    <mode>native</mode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <image>
+                        <buildpacks>
+                            <buildpack>gcr.io/paketo-buildpacks/java-native-image:${graalvm.version}</buildpack>
+                        </buildpacks>
+                    </image>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>spring-milestone</id>
+            <name>Spring milestone</name>
+            <url>https://repo.spring.io/milestone</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>spring-milestone</id>
+            <name>Spring milestone</name>
+            <url>https://repo.spring.io/milestone</url>
+        </pluginRepository>
+    </pluginRepositories>
+</project>

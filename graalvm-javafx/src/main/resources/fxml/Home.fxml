@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="600.0" stylesheets="@../css/Home.css" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.star.graalvm.control.HomeControl">
+   <children>
+      <Button fx:id="alterBtn" layoutX="74.0" layoutY="112.0" mnemonicParsing="false" onMouseClicked="#alterBtnClick" prefHeight="28.0" prefWidth="68.0" text="弹窗" />
+      <Button fx:id="fileBtn" layoutX="441.0" layoutY="112.0" mnemonicParsing="false" onMouseClicked="#fileBtnClick" prefHeight="28.0" prefWidth="68.0" text="文件选择" />
+      <TextField fx:id="fileText" layoutX="86.0" layoutY="170.0" prefHeight="43.0" prefWidth="429.0" promptText="文件地址" />
+      <ImageView fx:id="imgView" fitHeight="290.0" fitWidth="429.0" layoutX="89.0" layoutY="242.0" pickOnBounds="true" preserveRatio="true" />
+   </children>
+</AnchorPane>
